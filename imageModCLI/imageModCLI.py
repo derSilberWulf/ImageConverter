@@ -20,9 +20,7 @@ the command line and selecting what the program should do"""
             print("GRAAAAAAAY")
     
 
-    def callErrorMessage(self, message):
-        print(message);
-        print("Usage : python imageModCLI option filename")
+    
 
 
 
