@@ -1,7 +1,9 @@
 from django.db import models
 
-# Create your models here.
 class StoredImage(models.Model):
+    """
+    A model for storing images
+    """
     image = models.ImageField(upload_to='database')
     owner = models.ForeignKey('auth.User')
     

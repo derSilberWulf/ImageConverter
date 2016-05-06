@@ -11,7 +11,7 @@ from .permissions import IsOwner
 
 class ImageViewSet(viewsets.ModelViewSet):
     """
-    API endpoint that allows users to be viewed or edited.
+    Set of views that allows images to be viewed, created, or destroyed.
     """
     queryset = StoredImage.objects.all()
     serializer_class = StoredImageSerializer
@@ -22,10 +22,13 @@ class ImageViewSet(viewsets.ModelViewSet):
     
     def get_queryset(self):
          """
-         Only list images that belong to the user
+         Only list images that belong to the user.
          """
          return StoredImage.objects.filter(owner=self.request.user)
    
     def perform_create(self, serializer):
+         """
+         Modify the create process to add the user as a foreign key to image.
+         """
          serializer.save(owner=self.request.user)
 
