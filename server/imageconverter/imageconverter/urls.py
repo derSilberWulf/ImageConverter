@@ -26,7 +26,8 @@ router.register(r'images', views.ImageViewSet)
 urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
     url(r'^', include(router.urls)),
-    url(r'^images/(?P<pk>[0-9]*)/download/', views.DownloadView.as_view()),
+    url(r'^images/(?P<pk>[0-9]*)/download/$', views.DownloadView.as_view()),
+    #url(r'^images/(?P<pk>[^/]*)/download/$', views.DownloadView.as_view()),
     url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework'))
     
 ]

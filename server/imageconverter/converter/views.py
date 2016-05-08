@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from .models import StoredImage
 
 from rest_framework import viewsets
@@ -17,12 +17,14 @@ from django.core.servers.basehttp import FileWrapper
 class DownloadView(generics.GenericAPIView):
     permission_classes = (IsAuthenticated, IsOwner, )
     authentication_classes = (SessionAuthentication,)
+    http_method_names = ['get']
     def get(self, request, pk):
         """
-        Send back a file.
+        Send back a file. Only allow files that belong to the requester.
         """
-        filename = StoredImage.objects.filter(id=pk, owner=request.user)[0].image.path
-        wrapper = FileWrapper(StoredImage.objects.filter(id=9, owner=request.user)[0].image.file)
+        user_image = get_object_or_404(StoredImage, owner=request.user, id=pk)
+        filename = user_image.image.path
+        wrapper = FileWrapper(user_image.image.file)
         response = HttpResponse(wrapper, content_type='image')
         response['Content-Length'] = os.path.getsize(filename)
         #replace attachment with inline to get browser to display image
