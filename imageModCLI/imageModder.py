@@ -1,5 +1,6 @@
 import cv2
-import copy
+import numpy
+#import copy
 
 class ImageModder:
     """This class opens an image and uses openCV to apply various effects to
@@ -61,24 +62,39 @@ class ImageModder:
 
 
     def inverse(self):
-        """This method increases the intensity of specified channels by 10"""
+        """reverses the colors in the picture"""
         if(not self.original_img == None and imgModder.original_img.ndim > 2 and self.original_img.shape[2] >=3):
             self.original_img[:,:,0] += (255 /2)
             self.original_img[:,:,1] += (255 /2)
             self.original_img[:,:,2] += (255 /2)
+            
         else:
             print("ERROR")
-        
+
+    def addAlphaChannel(self):
+        b , g , r = cv2.split(self.original_img)
+        alpha = numpy.zeros(b.shape, dtype=b.dtype)
+        self.original_img = cv2.merge((b,g,r,alpha))
+        self.original_img[:,:,3] = 50
+        print(self.original_img[0,0,3])
+        """cv2.imshow('b',b)
+        cv2.imshow('g', b)
+        cv2.imshow('r', r)
+        cv2.imshow('a', alpha)
+        cv2.imshow('image', self.original_img)
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()"""
         
 
 
 ## Test program to be removed
 imgModder = ImageModder()
 imgModder.loadImage("example.jpg")
-imgModder.inverse()
-cv2.imshow('hello',imgModder.original_img)
-cv2.waitKey(0)
-cv2.destroyAllWindows()
+imgModder.addAlphaChannel()
+imgModder.saveImage("Example2.jpg")
+
+
+print type(imgModder.original_img)
 
 
 

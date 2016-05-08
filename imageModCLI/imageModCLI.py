@@ -17,7 +17,7 @@ the command line and selecting what the program should do"""
     def parseCommand(self):
         args = self.parser.parse_args()
         if(args.grayscale):
-            print("GRAAAAAAAY")
+            pass
     
 
     
