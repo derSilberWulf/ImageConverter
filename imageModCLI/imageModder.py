@@ -62,21 +62,24 @@ class ImageModder:
 
 
     def inverse(self):
-        """reverses the colors in the picture"""
+        """reverses the colors in the picture by subtracting BGR values from the max value (255)"""
         if(not self.original_img == None and imgModder.original_img.ndim > 2 and self.original_img.shape[2] >=3):
-            self.original_img[:,:,0] += (255 /2)
-            self.original_img[:,:,1] += (255 /2)
-            self.original_img[:,:,2] += (255 /2)
+            
+            self.original_img[:,:,0] = 255 - self.original_img[:,:,0]          
+            self.original_img[:,:,1] = 255 - self.original_img[:,:,1]
+            self.original_img[:,:,2] = 255 - self.original_img[:,:,2]
+            
             
         else:
             print("ERROR")
 
     def addAlphaChannel(self):
-        b , g , r = cv2.split(self.original_img)
-        alpha = numpy.zeros(b.shape, dtype=b.dtype)
-        self.original_img = cv2.merge((b,g,r,alpha))
-        self.original_img[:,:,3] = 50
-        print(self.original_img[0,0,3])
+        """Converts the image to the BGRA colorspace"""
+        self.original_img = cv2.cvtColor(self.original_img, cv2.COLOR_BGR2BGRA)
+        #b , g , r = cv2.split(self.original_img)
+        #alpha = numpy.zeros(b.shape, dtype=b.dtype)
+        #self.original_img = cv2.merge((b,g,r,alpha))
+        #self.original_img[:,:,3] = 150
         """cv2.imshow('b',b)
         cv2.imshow('g', b)
         cv2.imshow('r', r)
@@ -86,12 +89,30 @@ class ImageModder:
         cv2.destroyAllWindows()"""
         
 
+    def makeColorTransparent(self, bgrColor):
+        """This method accepts a BGR color as a list (ex: [100, 250, 0] ) and then makes the alpha channel transparent for any
+        color that matches in the image"""
+        img = self.original_img
+        # loop across the image, setting all pixels of this color to completely transparent
+        for x in range(0, img.shape[0]):
+            for y in range(0, img.shape[1]):
+                if bgrColor[0] == img.item(x,y,0) and bgrColor[1] == img.item(x,y,1) and bgrColor[2] == img.item(x,y,2):
+                    self.original_img.itemset(x,y,3, 0)
+
+                    
+
+        
+        
+
 
 ## Test program to be removed
 imgModder = ImageModder()
-imgModder.loadImage("example.jpg")
-imgModder.addAlphaChannel()
-imgModder.saveImage("Example2.jpg")
+imgModder.loadImage("example.png")
+imgModder.inverse()
+#imgModder.addAlphaChannel()
+
+#imgModder.makeColorTransparent((0,0,0))
+imgModder.saveImage("example2.png")
 
 
 print type(imgModder.original_img)
