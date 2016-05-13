@@ -33,7 +33,7 @@ def makeColorTransparent(modder, arguments):
     t_green : a number between 0-255
     t_blue : a number between 0-255
     """
-    alpha_color = [arguments['t_blue'], arguments['t_green'], arguments['t_red']]
+    alpha_color = [float(arguments['t_blue']), float(arguments['t_green']), float(arguments['t_red'])]
     modder.makeColorTransparent(alpha_color)
 
 #Map names to methods for RMI

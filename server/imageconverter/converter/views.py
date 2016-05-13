@@ -16,6 +16,18 @@ from .imagefunctions import modifyImage
 import os
 
 
+functionlist = [
+                {'displayname' : 'remove red', 'name' : 'remove_red', 'args' : []},
+                {'displayname' : 'remove green', 'name' : 'remove_green', 'args' : []},
+                {'displayname' : 'remove blue', 'name' : 'remove_blue', 'args' : []},
+                {'displayname' : 'make color transparent', 'name' : 'transparent', 
+                   'args' : [
+                             {'displayname' : 'red', 'name' : 't_red'},
+                             {'displayname' : 'blue', 'name' : 't_blue'},
+                             {'displayname' : 'green', 'name' : 't_green'}
+                            ]
+                },
+               ]
 
 class ImageModifierView(generics.GenericAPIView):
     permission_classes = (IsAuthenticated, IsOwner, )
@@ -25,7 +37,6 @@ class ImageModifierView(generics.GenericAPIView):
     def get(self, request):
         template = loader.get_template('converter/editImage.html')
         ownedImages = StoredImage.objects.filter(owner=request.user)
-        functionlist = ['invert', 'addalpha']
         context = {
                    'imagelist' : ownedImages,
                    'functionlist' : functionlist
@@ -34,10 +45,12 @@ class ImageModifierView(generics.GenericAPIView):
         
     def post(self, request):
         pk = int(request.POST.get('image_id'))
+        functions = request.POST.getlist('functions', [])
         arguments = request.POST.dict()#dict(request.POST.iterlists())
         user_image = get_object_or_404(StoredImage, owner=request.user, id=pk)
         imgpath = user_image.image.path
-        modifyImage(imgpath, ['remove_red'], arguments)
+        
+        modifyImage(imgpath, functions, arguments)
         return redirect('download', pk=pk)
         
 

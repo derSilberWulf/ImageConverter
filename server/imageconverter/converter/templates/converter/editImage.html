@@ -23,12 +23,13 @@
                         <option value="{{i.id}}">{{i}}</option>
                     {% endfor %}
                     </select><br/><br/>
-                    <label>Select a function to apply</label><br/>
-                    <select>
+                    <label>Select functions to apply</label><br/>
                     {% for f in functionlist%}
-                        <option value="{{f}}">{{f}}</option>
+                    <input type="checkbox" name="functions" value="{{f.name}}" />{{f.displayname}}<br/>
+                    {% for a in f.args %}
+                    {{a.displayname}} : <input type="text" name="{{a.name}}" />
+                    {% endfor %}<br />
                     {% endfor %}
-                    </select>
                     <input type="submit" value="Submit"/>
                 </form>
 			</section>
