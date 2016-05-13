@@ -1,4 +1,4 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.template import loader
 from django.http import HttpResponse
 from django.core.servers.basehttp import FileWrapper
@@ -12,7 +12,7 @@ from rest_framework import generics
 from .serializers import StoredImageSerializer
 from .permissions import IsOwner
 from .models import StoredImage
-
+from .imagefunctions import modifyImage
 import os
 
 
@@ -20,7 +20,8 @@ import os
 class ImageModifierView(generics.GenericAPIView):
     permission_classes = (IsAuthenticated, IsOwner, )
     authentication_classes = (SessionAuthentication,)
-    http_method_names = ['get']
+    http_method_names = ['get', 'post']
+    
     def get(self, request):
         template = loader.get_template('converter/editImage.html')
         ownedImages = StoredImage.objects.filter(owner=request.user)
@@ -32,7 +33,13 @@ class ImageModifierView(generics.GenericAPIView):
         return HttpResponse(template.render(context, request))
         
     def post(self, request):
-        pass
+        pk = int(request.POST.get('image_id'))
+        arguments = request.POST.dict()#dict(request.POST.iterlists())
+        user_image = get_object_or_404(StoredImage, owner=request.user, id=pk)
+        imgpath = user_image.image.path
+        modifyImage(imgpath, ['remove_red'], arguments)
+        return redirect('download', pk=pk)
+        
 
 class DownloadView(generics.GenericAPIView):
     permission_classes = (IsAuthenticated, IsOwner, )
@@ -48,7 +55,8 @@ class DownloadView(generics.GenericAPIView):
         response = HttpResponse(wrapper, content_type='image')
         response['Content-Length'] = os.path.getsize(filename)
         #replace attachment with inline to get browser to display image
-        response['Content-Disposition'] = 'attachment; filename=' + os.path.basename(filename)
+        #response['Content-Disposition'] = 'attachment; filename=' + os.path.basename(filename)
+        response['Content-Disposition'] = 'inline; filename=' + os.path.basename(filename)
         return response
 
 

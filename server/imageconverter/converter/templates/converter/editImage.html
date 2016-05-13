@@ -16,7 +16,7 @@
 		<div id="content-wrapper">
 
 			<section id="content">
-                <form>
+                <form method="post"> {% csrf_token %}
                     <label>Select an image to apply a function to</label><br/>
                     <select name="image_id">
                     {% for i in imagelist%}
@@ -29,6 +29,7 @@
                         <option value="{{f}}">{{f}}</option>
                     {% endfor %}
                     </select>
+                    <input type="submit" value="Submit"/>
                 </form>
 			</section>
 
