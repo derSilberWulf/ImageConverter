@@ -1,38 +1,45 @@
 import cv2
 import numpy
-#import copy
 
 class ImageModder:
     """This class opens an image and uses openCV to apply various effects to
-    the image"""
+    the image."""
 
-    
-
-    def __init__(self):
+    def __init__(self, filepath=None):
+        """init method includes an optional filepath argument to open an image file as is"""
         
         self.original_img = None
-            
+        if(not filepath is None):
+            self.loadImage(filepath)
+    
 
 
     def loadImage(self, imageFilePath, flag=cv2.IMREAD_UNCHANGED):
         """Loads an image using the given file path, replacing any image already
-        loaded in this class.  The flag is used to determine how openCV loads it"""
-        if(not imageFilePath==None):
-            self.original_img = cv2.imread(imageFilePath, flag)
-        else:
-            print("ERROR: no file path provided, image not loaded")
+        loaded in this class.  The optional flag is used to determine how openCV loads it"""
+
+        self.original_img = cv2.imread(imageFilePath, flag)
+        # check for an error opening the file: this openCV function returns none if the file did not load
+
+        if self.original_img is None:
+            raise IOError("OpenCV failed to load an image using this file path: " + imageFilePath)
+            
+        
 
 
     def loadImageInGrayscale(self, imageFilePath):
+        """This method calls the loadImage method with the flag set to the openCV constant for loading in grayscale"""
         self.loadImage(imageFilePath,  flag=cv2.IMREAD_GRAYSCALE)
         
         
 
-    def saveImage(self, filePath):
-        if(not filePath==None):
-            cv2.imwrite(filePath,self.original_img)
+    def saveImage(self, filepath):
+        """This method saves the image loaded into this class to the specified filepath, which should have
+           an extension for one of the image types openCV can handle"""
+        if(self.imageLoaded()):
+            cv2.imwrite(filepath,self.original_img)
         else:
-            print("ERROR: no file path provided, image not written")
+            raise IOError("No image was loaded so it could not be saved")
 
 
     def removeRedFromImage(self):
@@ -74,19 +81,9 @@ class ImageModder:
             print("ERROR")
 
     def addAlphaChannel(self):
-        """Converts the image to the BGRA colorspace"""
+        """Converts the BGR image to the BGRA colorspace"""
         self.original_img = cv2.cvtColor(self.original_img, cv2.COLOR_BGR2BGRA)
-        #b , g , r = cv2.split(self.original_img)
-        #alpha = numpy.zeros(b.shape, dtype=b.dtype)
-        #self.original_img = cv2.merge((b,g,r,alpha))
-        #self.original_img[:,:,3] = 150
-        """cv2.imshow('b',b)
-        cv2.imshow('g', b)
-        cv2.imshow('r', r)
-        cv2.imshow('a', alpha)
-        cv2.imshow('image', self.original_img)
-        cv2.waitKey(0)
-        cv2.destroyAllWindows()"""
+        
         
 
     def makeColorTransparent(self, bgrColor):
@@ -99,23 +96,72 @@ class ImageModder:
                 if bgrColor[0] == img.item(x,y,0) and bgrColor[1] == img.item(x,y,1) and bgrColor[2] == img.item(x,y,2):
                     self.original_img.itemset(x,y,3, 0)
 
+
+    def imageLoaded(self):
+        return not self.original_img is None
+    
+    def isGrayscaleImage(self):
+        if self.imageLoaded():
+            return self.original_img.ndim == 2
+        else:
+            return False
+
+    def isBGRImage(self):
+        if self.imageLoaded():
+            return self.original_img.ndim == 3 and self.original_img.shape[2] == 3
+        else:
+            return False
+
+    def isBGRAImage(self):
+        if self.imageLoaded():
+            return self.original_img.ndim == 3 and self.original_img.shape[2] == 4
+        else:
+            return False
+
+
+    
+           
+
                     
 
         
-        
+def testBooleanMethods(imgModder):
+    print("isLoaded : " +str(imgModder.imageLoaded()))
+    print("isGrayscale : " +str(imgModder.isGrayscaleImage()))
+    print("isBGRImage : " +str(imgModder.isBGRImage()))
+    print("isBGRAImage : " +str(imgModder.isBGRAImage()))
+    print("----------------------------------------------")  
 
 if __name__ == '__main__':
     ## Test program to be removed
     imgModder = ImageModder()
+    print("None loaded")
+    testBooleanMethods(imgModder)
+    
+    imgModder.loadImageInGrayscale("example.png")
+    print("Grayscale loaded")
+    testBooleanMethods(imgModder)
+    
     imgModder.loadImage("example.png")
+    print("BGR loaded")
     imgModder.inverse()
-    #imgModder.addAlphaChannel()
+    testBooleanMethods(imgModder)
+
+    
+    imgModder.addAlphaChannel()
+    print("BGRA loaded")
+    testBooleanMethods(imgModder)
 
     #imgModder.makeColorTransparent((0,0,0))
     imgModder.saveImage("example2.png")
 
+    
 
-    print type(imgModder.original_img)
+
+
+
+
+
 
 
 
