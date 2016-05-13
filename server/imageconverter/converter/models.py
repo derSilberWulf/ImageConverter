@@ -15,6 +15,10 @@ class StoredImage(models.Model):
         """
         self.image.delete()
         super(StoredImage, self).delete(*args, **kwargs)
+
     def __unicode__(self):
+        """
+        The string version of the image is the filename
+        """
         return os.path.basename(self.image.path)
         

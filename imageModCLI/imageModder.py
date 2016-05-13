@@ -17,7 +17,7 @@ class ImageModder:
     def loadImage(self, imageFilePath, flag=cv2.IMREAD_UNCHANGED):
         """Loads an image using the given file path, replacing any image already
         loaded in this class.  The flag is used to determine how openCV loads it"""
-        if(not imageFilePath is None):
+        if(not imageFilePath==None):
             self.original_img = cv2.imread(imageFilePath, flag)
         else:
             print("ERROR: no file path provided, image not loaded")
@@ -29,7 +29,7 @@ class ImageModder:
         
 
     def saveImage(self, filePath):
-        if(not filePath is None):
+        if(not filePath==None):
             cv2.imwrite(filePath,self.original_img)
         else:
             print("ERROR: no file path provided, image not written")
@@ -38,7 +38,7 @@ class ImageModder:
     def removeRedFromImage(self):
         """This method removes red from the image by setting all values in
         the red channel to zero"""
-        if(not self.original_img is None and imgModder.original_img.ndim > 2 and self.original_img.shape[2] >=3):
+        if(not self.original_img is None and self.original_img.ndim > 2 and self.original_img.shape[2] >=3):
             self.original_img[:,:,2] = 0
         else:
             print("ERROR: image does not contain a red channel")
@@ -47,7 +47,7 @@ class ImageModder:
     def removeGreenFromImage(self):
         """This method removes green from the image by setting all values in
         the green channel to zero"""
-        if(not self.original_img is None and imgModder.original_img.ndim > 2 and self.original_img.shape[2] >=3):
+        if(not self.original_img is None and self.original_img.ndim > 2 and self.original_img.shape[2] >=3):
             self.original_img[:,:,1] = 0
         else:
             print("ERROR: image does not contain a green channel")
@@ -55,7 +55,7 @@ class ImageModder:
     def removeBlueFromImage(self):
         """This method removes blue from the image by setting all values in
         the blue channel to zero"""
-        if(not self.original_img is None and imgModder.original_img.ndim > 2 and self.original_img.shape[2] >=3):
+        if(not self.original_img is None and self.original_img.ndim > 2 and self.original_img.shape[2] >=3):
             self.original_img[:,:,0] = 0
         else:
             print("ERROR: image does not contain a blue channel")
@@ -63,7 +63,7 @@ class ImageModder:
 
     def inverse(self):
         """reverses the colors in the picture by subtracting BGR values from the max value (255)"""
-        if(not self.original_img is None and imgModder.original_img.ndim > 2 and self.original_img.shape[2] >=3):
+        if(not self.original_img is None and self.original_img.ndim > 2 and self.original_img.shape[2] >=3):
             
             self.original_img[:,:,0] = 255 - self.original_img[:,:,0]          
             self.original_img[:,:,1] = 255 - self.original_img[:,:,1]
@@ -104,18 +104,18 @@ class ImageModder:
         
         
 
+if __name__ == '__main__':
+    ## Test program to be removed
+    imgModder = ImageModder()
+    imgModder.loadImage("example.png")
+    imgModder.inverse()
+    #imgModder.addAlphaChannel()
 
-## Test program to be removed
-imgModder = ImageModder()
-imgModder.loadImage("example.png")
-imgModder.inverse()
-#imgModder.addAlphaChannel()
-
-#imgModder.makeColorTransparent((0,0,0))
-imgModder.saveImage("example2.png")
+    #imgModder.makeColorTransparent((0,0,0))
+    imgModder.saveImage("example2.png")
 
 
-print type(imgModder.original_img)
+    print type(imgModder.original_img)
 
 
 

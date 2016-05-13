@@ -1,0 +1,40 @@
+<!DOCTYPE html> 
+
+<html>
+
+	<head>
+
+		<meta charset="UTF-8" />
+
+		<title>Modify Your Images</title>
+
+	</head>
+
+	<body class="" lang="en-US">
+
+
+		<div id="content-wrapper">
+
+			<section id="content">
+                <form>
+                    <label>Select an image to apply a function to</label><br/>
+                    <select name="image_id">
+                    {% for i in imagelist%}
+                        <option value="{{i.id}}">{{i}}</option>
+                    {% endfor %}
+                    </select><br/><br/>
+                    <label>Select a function to apply</label><br/>
+                    <select>
+                    {% for f in functionlist%}
+                        <option value="{{f}}">{{f}}</option>
+                    {% endfor %}
+                    </select>
+                </form>
+			</section>
+
+
+		</div>
+
+	</body>
+
+</html>

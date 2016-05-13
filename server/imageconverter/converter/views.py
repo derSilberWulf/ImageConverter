@@ -1,5 +1,8 @@
 from django.shortcuts import render, get_object_or_404
-from .models import StoredImage
+from django.template import loader
+from django.http import HttpResponse
+from django.core.servers.basehttp import FileWrapper
+
 
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
@@ -8,12 +11,29 @@ from rest_framework import generics
 
 from .serializers import StoredImageSerializer
 from .permissions import IsOwner
-
+from .models import StoredImage
 
 import os
-from django.http import HttpResponse
-from django.core.servers.basehttp import FileWrapper
-#TO DO: Fix error messages when objects don't exist
+
+
+
+class ImageModifierView(generics.GenericAPIView):
+    permission_classes = (IsAuthenticated, IsOwner, )
+    authentication_classes = (SessionAuthentication,)
+    http_method_names = ['get']
+    def get(self, request):
+        template = loader.get_template('converter/editImage.html')
+        ownedImages = StoredImage.objects.filter(owner=request.user)
+        functionlist = ['invert', 'addalpha']
+        context = {
+                   'imagelist' : ownedImages,
+                   'functionlist' : functionlist
+                   }
+        return HttpResponse(template.render(context, request))
+        
+    def post(self, request):
+        pass
+
 class DownloadView(generics.GenericAPIView):
     permission_classes = (IsAuthenticated, IsOwner, )
     authentication_classes = (SessionAuthentication,)
