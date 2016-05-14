@@ -7,7 +7,6 @@ class ImageModder:
 
     def __init__(self, filepath=None):
         """init method includes an optional filepath argument to open an image file as is"""
-        
         self.original_img = None
         if(not filepath is None):
             self.loadImage(filepath)
@@ -36,59 +35,62 @@ class ImageModder:
     def saveImage(self, filepath):
         """This method saves the image loaded into this class to the specified filepath, which should have
            an extension for one of the image types openCV can handle"""
-        if(self.imageLoaded()):
-            cv2.imwrite(filepath,self.original_img)
-        else:
-            raise IOError("No image was loaded so it could not be saved")
+        self.__checkForImageLoaded()
+        cv2.imwrite(filepath,self.original_img)
 
 
     def removeRedFromImage(self):
         """This method removes red from the image by setting all values in
         the red channel to zero"""
-        if(not self.original_img is None and self.original_img.ndim > 2 and self.original_img.shape[2] >=3):
-            self.original_img[:,:,2] = 0
-        else:
-            print("ERROR: image does not contain a red channel")
-            
-
+        self.__checkForImageLoaded()
+        self.__checkForNumChannels(3)
+        self.original_img[:,:,2] = 0
+        
     def removeGreenFromImage(self):
         """This method removes green from the image by setting all values in
         the green channel to zero"""
-        if(not self.original_img is None and self.original_img.ndim > 2 and self.original_img.shape[2] >=3):
-            self.original_img[:,:,1] = 0
-        else:
-            print("ERROR: image does not contain a green channel")
+        self.__checkForImageLoaded()
+        self.__checkForNumChannels(3)
+        self.original_img[:,:,1] = 0
+        
 
     def removeBlueFromImage(self):
         """This method removes blue from the image by setting all values in
         the blue channel to zero"""
-        if(not self.original_img is None and self.original_img.ndim > 2 and self.original_img.shape[2] >=3):
-            self.original_img[:,:,0] = 0
-        else:
-            print("ERROR: image does not contain a blue channel")
+        self.__checkForImageLoaded()
+        self.__checkForNumChannels(3)
+        self.original_img[:,:,0] = 0
+        
 
 
     def inverse(self):
         """reverses the colors in the picture by subtracting BGR values from the max value (255)"""
-        if(not self.original_img is None and self.original_img.ndim > 2 and self.original_img.shape[2] >=3):
-            
-            self.original_img[:,:,0] = 255 - self.original_img[:,:,0]          
-            self.original_img[:,:,1] = 255 - self.original_img[:,:,1]
-            self.original_img[:,:,2] = 255 - self.original_img[:,:,2]
+        self.__checkForImageLoaded()
+        self.__checkForNumChannels(3)
+                    
+        self.original_img[:,:,0] = 255 - self.original_img[:,:,0]          
+        self.original_img[:,:,1] = 255 - self.original_img[:,:,1]
+        self.original_img[:,:,2] = 255 - self.original_img[:,:,2]
             
             
         else:
             print("ERROR")
 
     def addAlphaChannel(self):
-        """Converts the BGR image to the BGRA colorspace"""
-        self.original_img = cv2.cvtColor(self.original_img, cv2.COLOR_BGR2BGRA)
+        """Converts the image to the BGRA colorspace"""
+        self.__checkForImageLoaded()
+        if self.isGrayscaleImage():
+            self.original_img = cv2.cvtColor(self.original_img, cv2.COLOR_GRAY2BGRA)
+        elif self.isBGRImage:
+            self.original_img = cv2.cvtColor(self.original_img, cv2.COLOR_BGR2BGRA)
         
         
 
     def makeColorTransparent(self, bgrColor):
         """This method accepts a BGR color as a list (ex: [100, 250, 0] ) and then makes the alpha channel transparent for any
         color that matches in the image"""
+        self.__checkForImageLoaded()
+        self.__checkForNumChannels(4)
         img = self.original_img
         # loop across the image, setting all pixels of this color to completely transparent
         for x in range(0, img.shape[0]):
@@ -118,9 +120,25 @@ class ImageModder:
         else:
             return False
 
+    def hasAtLeastNColorChannels(self, numberChannels):
+        if self.imageLoaded():
+            nDimensions = self.original_img.ndim
+            if numberChannels <= 1  and nDimensions >= 2:
+                return True
+            
+            return nDimensions >= 3 and self.original_img.shape[2] >= numberChannels
+                              
+        else:
+            return False
 
-    
-           
+
+    def __checkForImageLoaded(self):
+        if not self.imageLoaded():
+            raise Exception("Operation failed : no image loaded in ImageModder object")
+
+    def __checkForNumChannels(self, requiredChannels):
+        if not self.hasAtLeastNColorChannels(requiredChannels):
+            raise Exception("Operation failed : image loaded does not have the required amount of color channels : " + str(requiredChannels))
 
                     
 
@@ -130,6 +148,9 @@ def testBooleanMethods(imgModder):
     print("isGrayscale : " +str(imgModder.isGrayscaleImage()))
     print("isBGRImage : " +str(imgModder.isBGRImage()))
     print("isBGRAImage : " +str(imgModder.isBGRAImage()))
+    print("has at least 1 channel: " + str(imgModder.hasAtLeastNColorChannels(1)))
+    print("has at least 3 channels: " + str(imgModder.hasAtLeastNColorChannels(3)))
+    print("has at least 4 channels: " + str(imgModder.hasAtLeastNColorChannels(4)))
     print("----------------------------------------------")  
 
 if __name__ == '__main__':
@@ -137,7 +158,12 @@ if __name__ == '__main__':
     imgModder = ImageModder()
     print("None loaded")
     testBooleanMethods(imgModder)
-    
+
+    try:
+        imgModder.removeRedFromImage()
+    except Exception, Argument:
+        print(Argument)
+        
     imgModder.loadImageInGrayscale("example.png")
     print("Grayscale loaded")
     testBooleanMethods(imgModder)
